@@ -2,7 +2,7 @@
 
 realpath()
 {
- oldpath=`pwd`
+ oldpath=$(pwd)
  if ! cd $1 > /dev/null 2>&1; then
   cd ${1##*/} > /dev/null 2>&1
   echo $( pwd -P )/${1%/*}
@@ -13,18 +13,18 @@ realpath()
 }
 
 cd "$(realpath "$0")"
-echo "entering `pwd`"
+echo "entering $(pwd)"
 
-if [ "`uname -m`" = "armv6l" ] || [ "`uname -m`" = "aarch64" ] || [ "$RASPI" = 1 ]; then
+if [ "$(uname -m)" = "armv6l" ] || [ "$(uname -m)" = "aarch64" ] || [ "$RASPI" = 1 ]; then
 jplatform="${jplatform:=raspberry}"
-elif [ "`uname`" = "Darwin" ]; then
+elif [ "$(uname)" = "Darwin" ]; then
 jplatform="${jplatform:=darwin}"
 else
 jplatform="${jplatform:=linux}"
 fi
-if [ "`uname -m`" = "x86_64" ]; then
+if [ "$(uname -m)" = "x86_64" ]; then
 j64x="${j64x:=j64avx}"
-elif [ "`uname -m`" = "aarch64" ]; then
+elif [ "$(uname -m)" = "aarch64" ]; then
 j64x="${j64x:=j64}"
 else
 j64x="${j64x:=j32}"
@@ -49,7 +49,7 @@ fi
 fi
 export CC
 fi
-# compiler=`$CC --version | head -n 1`
+# compiler=$($CC --version | head -n 1)
 compiler=$(readlink -f $(command -v $CC) 2> /dev/null || echo $CC)
 echo "CC=$CC"
 echo "compiler=$compiler"
