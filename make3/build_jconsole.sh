@@ -1,20 +1,5 @@
 #!/bin/sh
 
-realpath()
-{
- oldpath=$(pwd)
- if ! cd "$1" > /dev/null 2>&1; then
-  cd "${1##*/}" > /dev/null 2>&1
-  echo "$( pwd -P )/${1%/*}"
- else
-  pwd -P
- fi
- cd "$oldpath" > /dev/null 2>&1
-}
-
-cd "$(realpath "$0")"
-echo "entering $(pwd)"
-
 if [ "$(uname -m)" = "armv6l" ] || [ "$(uname -m)" = "aarch64" ] || [ "$RASPI" = 1 ]; then
 jplatform="${jplatform:=raspberry}"
 elif [ "$(uname)" = "Darwin" ]; then
@@ -196,10 +181,12 @@ if [ ! -f ../jsrc/jversion.h ] ; then
   cp ../jsrc/jversion-x.h ../jsrc/jversion.h
 fi
 
-mkdir -p "../bin/$jplatform/$j64x"
-mkdir -p "obj/$jplatform/$j64x/"
+jmake=$(dirname "$0")
+jsource=$jmake/..
+
+mkdir -p "$jsource/bin/$jplatform/$j64x"
+mkdir -p "$jmake/obj/$jplatform/$j64x/"
 cp makefile-jconsole "obj/$jplatform/$j64x/."
+
 export CFLAGS LDFLAGS TARGET OBJSLN jplatform j64x
-cd "obj/$jplatform/$j64x/"
-make -f makefile-jconsole
-cd -
+make -C "$jmake/obj/$jplatform/$j64x/" -f makefile-jconsole
