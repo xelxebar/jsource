@@ -1,6 +1,7 @@
-#!/bin/sh
+#!/usr/bin/env sh
+set -o errexit -o nounset -o noclobber
 
-if [ "$(uname -m)" = "armv6l" ] || [ "$(uname -m)" = "aarch64" ] || [ "$RASPI" = 1 ]; then
+if [ "$(uname -m)" = "armv6l" ] || [ "$(uname -m)" = "aarch64" ] || [ "${RASPI:-}" = 1 ]; then
 jplatform="${jplatform:=raspberry}"
 elif [ "$(uname)" = "Darwin" ]; then
 jplatform="${jplatform:=darwin}"
@@ -23,7 +24,7 @@ USE_LINENOISE="${USE_LINENOISE:=1}"
 
 macmin="-mmacosx-version-min=10.6"
 
-if [ "x$CC" = x'' ] ; then
+if [ "x${CC:-}" = x'' ] ; then
 if [ -f "/usr/bin/cc" ]; then
 CC=cc
 else
@@ -53,7 +54,7 @@ fi
 
 if [ -z "${compiler##*gcc*}" ] || [ -z "${CC##*gcc*}" ]; then
 # gcc
-common="$USETHREAD $FVERBOSELOG -Werror -fPIC -O2 -fvisibility=hidden -fwrapv -fno-strict-aliasing -Wextra -Wno-unused-parameter -Wno-sign-compare -Wno-clobbered -Wno-empty-body -Wno-unused-value -Wno-pointer-sign -Wno-parentheses -Wno-type-limits"
+common="${USETHREAD:-} ${FVERBOSELOG:-} -Werror -fPIC -O2 -fvisibility=hidden -fwrapv -fno-strict-aliasing -Wextra -Wno-unused-parameter -Wno-sign-compare -Wno-clobbered -Wno-empty-body -Wno-unused-value -Wno-pointer-sign -Wno-parentheses -Wno-type-limits"
 GNUC_MAJOR=$(echo __GNUC__ | "$CC" -E -x c - | tail -n 1)
 # shellcheck disable=SC2034
 GNUC_MINOR=$(echo __GNUC_MINOR__ | "$CC" -E -x c - | tail -n 1)
@@ -74,7 +75,7 @@ common="$common -Wno-cast-function-type"
 fi
 else
 # clang 3.4
-common="$USETHREAD $FVERBOSELOG -Werror -fPIC -O2 -fvisibility=hidden -fwrapv -fno-strict-aliasing -Wextra -Wno-consumed -Wuninitialized -Wno-unused-parameter -Wsign-compare -Wno-empty-body -Wno-unused-value -Wno-pointer-sign -Wno-parentheses -Wunsequenced -Wno-string-plus-int -Wtautological-constant-out-of-range-compare"
+common="${USETHREAD:-} ${FVERBOSELOG:-} -Werror -fPIC -O2 -fvisibility=hidden -fwrapv -fno-strict-aliasing -Wextra -Wno-consumed -Wuninitialized -Wno-unused-parameter -Wsign-compare -Wno-empty-body -Wno-unused-value -Wno-pointer-sign -Wno-parentheses -Wunsequenced -Wno-string-plus-int -Wtautological-constant-out-of-range-compare"
 # clang 3.8
 CLANG_MAJOR=$(echo __clang_major__ | "$CC" -E -x c - | tail -n 1)
 CLANG_MINOR=$(echo __clang_minor__ | "$CC" -E -x c - | tail -n 1)
@@ -104,68 +105,68 @@ case "${jplatform}_$j64x" in
 
 linux_j32)
 CFLAGS="$common -m32"
-LDFLAGS=" -m32 -ldl $LDTHREAD"
+LDFLAGS=" -m32 -ldl ${LDTHREAD:-}"
 ;;
 linux_j64)
 CFLAGS="$common"
-LDFLAGS=" -ldl $LDTHREAD"
+LDFLAGS=" -ldl ${LDTHREAD:-}"
 ;;
 linux_j64avx)
 CFLAGS="$common"
-LDFLAGS=" -ldl $LDTHREAD"
+LDFLAGS=" -ldl ${LDTHREAD:-}"
 ;;
 linux_j64avx2)
 CFLAGS="$common"
-LDFLAGS=" -ldl $LDTHREAD"
+LDFLAGS=" -ldl ${LDTHREAD:-}"
 ;;
 raspberry_j32)
 CFLAGS="$common -marm -march=armv6 -mfloat-abi=hard -mfpu=vfp -DRASPI"
-LDFLAGS=" -ldl $LDTHREAD"
+LDFLAGS=" -ldl ${LDTHREAD:-}"
 ;;
 raspberry_j64)
 CFLAGS="$common -march=armv8-a+crc -DRASPI"
-LDFLAGS=" -ldl $LDTHREAD"
+LDFLAGS=" -ldl ${LDTHREAD:-}"
 ;;
 darwin_j32)
 CFLAGS="$common -m32 $macmin"
-LDFLAGS=" -ldl $LDTHREAD -m32 $macmin "
+LDFLAGS=" -ldl ${LDTHREAD:-} -m32 $macmin "
 ;;
 #-mmacosx-version-min=10.5
 darwin_j64)
 CFLAGS="$common $macmin"
-LDFLAGS=" -ldl $LDTHREAD $macmin "
+LDFLAGS=" -ldl ${LDTHREAD:-} $macmin "
 ;;
 darwin_j64avx)
 CFLAGS="$common $macmin"
-LDFLAGS=" -ldl $LDTHREAD $macmin "
+LDFLAGS=" -ldl ${LDTHREAD:-} $macmin "
 ;;
 darwin_j64avx2)
 CFLAGS="$common $macmin"
-LDFLAGS=" -ldl $LDTHREAD $macmin "
+LDFLAGS=" -ldl ${LDTHREAD:-} $macmin "
 ;;
 windows_j32)
 TARGET=jconsole.exe
 CFLAGS="$common -m32 "
-LDFLAGS=" -m32 -Wl,--stack=0x1000000,--subsystem,console -static-libgcc $LDTHREAD"
+LDFLAGS=" -m32 -Wl,--stack=0x1000000,--subsystem,console -static-libgcc ${LDTHREAD:-}"
 ;;
 windows_j64)
 TARGET=jconsole.exe
 CFLAGS="$common"
-LDFLAGS=" -Wl,--stack=0x1000000,--subsystem,console -static-libgcc $LDTHREAD"
+LDFLAGS=" -Wl,--stack=0x1000000,--subsystem,console -static-libgcc ${LDTHREAD:-}"
 ;;
 windows_j64avx)
 TARGET=jconsole.exe
 CFLAGS="$common"
-LDFLAGS=" -Wl,--stack=0x1000000,--subsystem,console -static-libgcc $LDTHREAD"
+LDFLAGS=" -Wl,--stack=0x1000000,--subsystem,console -static-libgcc ${LDTHREAD:-}"
 ;;
 windows_j64avx2)
 TARGET=jconsole.exe
 CFLAGS="$common"
-LDFLAGS=" -Wl,--stack=0x1000000,--subsystem,console -static-libgcc $LDTHREAD"
+LDFLAGS=" -Wl,--stack=0x1000000,--subsystem,console -static-libgcc ${LDTHREAD:-}"
 ;;
 *)
 echo no case for those parameters
-exit
+exit 1
 esac
 
 cat <<-VARS
