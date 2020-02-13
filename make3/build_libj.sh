@@ -3,13 +3,13 @@
 realpath()
 {
  oldpath=$(pwd)
- if ! cd $1 > /dev/null 2>&1; then
-  cd ${1##*/} > /dev/null 2>&1
-  echo $( pwd -P )/${1%/*}
+ if ! cd "$1" > /dev/null 2>&1; then
+  cd "${1##*/}" > /dev/null 2>&1
+  echo "$( pwd -P )/${1%/*}"
  else
   pwd -P
  fi
- cd $oldpath > /dev/null 2>&1
+ cd "$oldpath" > /dev/null 2>&1
 }
 
 cd "$(realpath "$0")"
@@ -49,13 +49,13 @@ fi
 fi
 export CC
 fi
-# compiler=$($CC --version | head -n 1)
-compiler=$(readlink -f $(command -v $CC) 2> /dev/null || echo $CC)
+# compiler=$("$CC" --version | head -n 1)
+compiler=$(readlink -f "$(command -v "$CC")" 2> /dev/null || echo "$CC")
 echo "CC=$CC"
 echo "compiler=$compiler"
 
 USE_OPENMP="${USE_OPENMP:=0}"
-if [ $USE_OPENMP -eq 1 ] ; then
+if [ "$USE_OPENMP" -eq 1 ] ; then
 OPENMP=" -fopenmp "
 LDOPENMP=" -fopenmp "
 if [ -z "${compiler##*gcc*}" ] || [ -z "${CC##*gcc*}" ]; then
@@ -66,58 +66,58 @@ fi
 fi
 
 USE_THREAD="${USE_THREAD:=0}"
-if [ $USE_THREAD -eq 1 ] ; then
+if [ "$USE_THREAD" -eq 1 ] ; then
 USETHREAD=" -DUSE_THREAD "
 LDTHREAD=" -pthread "
 fi
 
 VERBOSELOG="${VERBOSELOG:=0}"
-if [ $VERBOSELOG -eq 1 ] ; then
+if [ "$VERBOSELOG" -eq 1 ] ; then
 FVERBOSELOG=" -DVERBOSELOG "
 fi
 
 if [ -z "${compiler##*gcc*}" ] || [ -z "${CC##*gcc*}" ]; then
 # gcc
 common="$OPENMP $USETHREAD $FVERBOSELOG -Werror -fPIC -O2 -fvisibility=hidden -fwrapv -fno-strict-aliasing -Wextra -Wno-unused-parameter -Wno-sign-compare -Wno-clobbered -Wno-empty-body -Wno-unused-value -Wno-pointer-sign -Wno-parentheses -Wno-type-limits"
-GNUC_MAJOR=$(echo __GNUC__ | $CC -E -x c - | tail -n 1)
-GNUC_MINOR=$(echo __GNUC_MINOR__ | $CC -E -x c - | tail -n 1)
-if [ $GNUC_MAJOR -ge 5 ] ; then
+GNUC_MAJOR=$(echo __GNUC__ | "$CC" -E -x c - | tail -n 1)
+GNUC_MINOR=$(echo __GNUC_MINOR__ | "$CC" -E -x c - | tail -n 1)
+if [ "$GNUC_MAJOR" -ge 5 ] ; then
 common="$common -Wno-maybe-uninitialized"
 else
 common="$common -DC_NOMULTINTRINSIC -Wno-uninitialized"
 fi
-if [ $GNUC_MAJOR -ge 6 ] ; then
+if [ "$GNUC_MAJOR" -ge 6 ] ; then
 common="$common -Wno-shift-negative-value"
 fi
 # alternatively, add comment /* fall through */
-if [ $GNUC_MAJOR -ge 7 ] ; then
+if [ "$GNUC_MAJOR" -ge 7 ] ; then
 common="$common -Wno-implicit-fallthrough"
 fi
-if [ $GNUC_MAJOR -ge 8 ] ; then
+if [ "$GNUC_MAJOR" -ge 8 ] ; then
 common="$common -Wno-cast-function-type"
 fi
 else
 # clang 3.4
 common="$OPENMP $USETHREAD $FVERBOSELOG -Werror -fPIC -O2 -fvisibility=hidden -fwrapv -fno-strict-aliasing -Wextra -Wno-consumed -Wuninitialized -Wno-unused-parameter -Wsign-compare -Wno-empty-body -Wno-unused-value -Wno-pointer-sign -Wno-parentheses -Wunsequenced -Wno-string-plus-int -Wtautological-constant-out-of-range-compare"
 # clang 3.8
-CLANG_MAJOR=$(echo __clang_major__ | $CC -E -x c - | tail -n 1)
-CLANG_MINOR=$(echo __clang_minor__ | $CC -E -x c - | tail -n 1)
-if [ $CLANG_MAJOR -eq 3 ] && [ $CLANG_MINOR -ge 8 ] ; then
+CLANG_MAJOR=$(echo __clang_major__ | "$CC" -E -x c - | tail -n 1)
+CLANG_MINOR=$(echo __clang_minor__ | "$CC" -E -x c - | tail -n 1)
+if [ "$CLANG_MAJOR" -eq 3 ] && [ "$CLANG_MINOR" -ge 8 ] ; then
 common="$common -Wno-pass-failed"
 else
-if [ $CLANG_MAJOR -ge 4 ] ; then
+if [ "$CLANG_MAJOR" -ge 4 ] ; then
 common="$common -Wno-pass-failed"
 fi
 fi
 # clang 10
-if [ $CLANG_MAJOR -ge 10 ] ; then
+if [ "$CLANG_MAJOR" -ge 10 ] ; then
 common="$common -Wno-implicit-float-conversion"
 fi
 fi
 
 NO_SHA_ASM="${NO_SHA_ASM:=0}"
 
-if [ $NO_SHA_ASM -ne 0 ] ; then
+if [ "$NO_SHA_ASM" -ne 0 ] ; then
 
 common="$common -DNO_SHA_ASM"
 
@@ -173,7 +173,7 @@ OBJS_ASM_WIN32=" \
 
 fi
 
-case $jplatform\_$j64x in
+case "${jplatform}_$j64x" in
 
 linux_j32) # linux x86
 TARGET=libj.so
@@ -288,7 +288,7 @@ CFLAGS="$common $DOLECOM -m32 -msse2 -mfpmath=sse -D_FILE_OFFSET_BITS=64 -D_JDLL
 # slower, use 387 fpu and truncate extra precision
 # CFLAGS="$common -m32 -ffloat-store "
 LDFLAGS=" -shared -Wl,--enable-stdcall-fixup -lm -static-libgcc -static-libstdc++ $LDOPENMP32 $LDTHREAD"
-if [ $jolecom -eq 1 ] ; then
+if [ "$jolecom" -eq 1 ] ; then
 DLLOBJS=" jdll.o jdllcomx.o "
 LIBJDEF=" ../../../../dllsrc/jdll.def "
 else
@@ -304,13 +304,13 @@ GASM_FLAGS=""
 
 windows_j64) # windows intel 64bit nonavx
 jolecom="${jolecom:=0}"
-if [ $jolecom -eq 1 ] ; then
+if [ "$jolecom" -eq 1 ] ; then
 DOLECOM="-DOLECOM"
 fi
 TARGET=j.dll
 CFLAGS="$common $DOLECOM -D_FILE_OFFSET_BITS=64 -D_JDLL "
 LDFLAGS=" -shared -Wl,--enable-stdcall-fixup -lm -static-libgcc -static-libstdc++ $LDOPENMP $LDTHREAD"
-if [ $jolecom -eq 1 ] ; then
+if [ "$jolecom" -eq 1 ] ; then
 DLLOBJS=" jdll.o jdllcomx.o "
 LIBJDEF=" ../../../../dllsrc/jdll.def "
 else
@@ -326,14 +326,14 @@ GASM_FLAGS=""
 
 windows_j64avx) # windows intel 64bit avx
 jolecom="${jolecom:=0}"
-if [ $jolecom -eq 1 ] ; then
+if [ "$jolecom" -eq 1 ] ; then
 DOLECOM="-DOLECOM"
 fi
 TARGET=j.dll
 CFLAGS="$common $DOLECOM -DC_AVX=1 -D_FILE_OFFSET_BITS=64 -D_JDLL "
 LDFLAGS=" -shared -Wl,--enable-stdcall-fixup -lm -static-libgcc -static-libstdc++ $LDOPENMP $LDTHREAD"
 CFLAGS_SIMD=" -mavx "
-if [ $jolecom -eq 1 ] ; then
+if [ "$jolecom" -eq 1 ] ; then
 DLLOBJS=" jdll.o jdllcomx.o "
 LIBJDEF=" ../../../../dllsrc/jdll.def "
 else
@@ -350,14 +350,14 @@ GASM_FLAGS=""
 
 windows_j64avx2) # windows intel 64bit avx
 jolecom="${jolecom:=0}"
-if [ $jolecom -eq 1 ] ; then
+if [ "$jolecom" -eq 1 ] ; then
 DOLECOM="-DOLECOM"
 fi
 TARGET=j.dll
 CFLAGS="$common $DOLECOM -DC_AVX=1 -DC_AVX2=1 -D_FILE_OFFSET_BITS=64 -D_JDLL "
 LDFLAGS=" -shared -Wl,--enable-stdcall-fixup -lm -static-libgcc -static-libstdc++ $LDOPENMP $LDTHREAD"
 CFLAGS_SIMD=" -mavx2 -mfma "
-if [ $jolecom -eq 1 ] ; then
+if [ "$jolecom" -eq 1 ] ; then
 DLLOBJS=" jdll.o jdllcomx.o "
 LIBJDEF=" ../../../../dllsrc/jdll.def "
 else
@@ -399,10 +399,10 @@ if [ ! -f ../jsrc/jversion.h ] ; then
   cp ../jsrc/jversion-x.h ../jsrc/jversion.h
 fi
 
-mkdir -p ../bin/$jplatform/$j64x
-mkdir -p obj/$jplatform/$j64x/
-cp makefile-libj obj/$jplatform/$j64x/.
+mkdir -p "../bin/$jplatform/$j64x"
+mkdir -p "obj/$jplatform/$j64x/"
+cp makefile-libj "obj/$jplatform/$j64x/."
 export CFLAGS LDFLAGS TARGET CFLAGS_SIMD GASM_FLAGS DLLOBJS LIBJDEF LIBJRES OBJS_FMA OBJS_AESNI OBJS_AESARM OBJS_ASM SRC_ASM jplatform j64x
-cd obj/$jplatform/$j64x/
+cd "obj/$jplatform/$j64x/"
 make -f makefile-libj
 cd -
