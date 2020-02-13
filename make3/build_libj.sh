@@ -65,6 +65,7 @@ if [ -z "${compiler##*gcc*}" ] || [ -z "${CC##*gcc*}" ]; then
 # gcc
 common="$OPENMP $USETHREAD $FVERBOSELOG -Werror -fPIC -O2 -fvisibility=hidden -fwrapv -fno-strict-aliasing -Wextra -Wno-unused-parameter -Wno-sign-compare -Wno-clobbered -Wno-empty-body -Wno-unused-value -Wno-pointer-sign -Wno-parentheses -Wno-type-limits"
 GNUC_MAJOR=$(echo __GNUC__ | "$CC" -E -x c - | tail -n 1)
+# shellcheck disable=SC2034
 GNUC_MINOR=$(echo __GNUC_MINOR__ | "$CC" -E -x c - | tail -n 1)
 if [ "$GNUC_MAJOR" -ge 5 ] ; then
 common="$common -Wno-maybe-uninitialized"
