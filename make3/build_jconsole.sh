@@ -182,7 +182,15 @@ echo no case for those parameters
 exit
 esac
 
-echo "CFLAGS=$CFLAGS"
+cat <<-VARS
+CFLAGS=${CFLAGS:-}
+LDFLAGS=${LDFLAGS:-}
+TARGET=${TARGET:-}
+OBJSLN=${OBJSLN:-}
+jplatform=${jplatform:-}
+j64x=${j64x:-}
+VARS
+
 
 if [ ! -f ../jsrc/jversion.h ] ; then
   cp ../jsrc/jversion-x.h ../jsrc/jversion.h

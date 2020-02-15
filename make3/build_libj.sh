@@ -377,7 +377,23 @@ echo no case for those parameters
 exit
 esac
 
-echo "CFLAGS=$CFLAGS"
+cat <<-VARS
+CFLAGS=${CFLAGS:-}
+LDFLAGS=${LDFLAGS:-}
+TARGET=${TARGET:-}
+CFLAGS_SIMD=${CFLAGS_SIMD:-}
+GASM_FLAGS=${GASM_FLAGS:-}
+DLLOBJS=${DLLOBJS:-}
+LIBJDEF=${LIBJDEF:-}
+LIBJRES=${LIBJRES:-}
+OBJS_FMA=${OBJS_FMA:-}
+OBJS_AESNI=${OBJS_AESNI:-}
+OBJS_AESARM=${OBJS_AESARM:-}
+OBJS_ASM=${OBJS_ASM:-}
+SRC_ASM=${SRC_ASM:-}
+jplatform=${jplatform:-}
+j64x=${j64x:-}
+VARS
 
 if [ ! -f ../jsrc/jversion.h ] ; then
   cp ../jsrc/jversion-x.h ../jsrc/jversion.h
